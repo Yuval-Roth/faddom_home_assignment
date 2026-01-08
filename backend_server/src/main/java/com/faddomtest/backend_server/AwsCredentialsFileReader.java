@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 public class AwsCredentialsFileReader implements AwsCredentialsProvider {
     private Map<String,String> credentialsMap;
     private static final String formatMessage = """
@@ -58,7 +57,7 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
         }
     }
 
-    public boolean validateCredentials() {
+    public boolean testCredentials() {
         // test the credentials by making an EC2 call
         try (Ec2Client ec2Client = Ec2Client.builder()
                 .credentialsProvider(this)

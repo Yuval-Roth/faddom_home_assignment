@@ -6,12 +6,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "aws")
 @Configuration
 public class AwsConfig {
-    private String credentialsPath;
 
-    public String getCredentialsPath() {
-        return credentialsPath;
-    }
-    public void setCredentialsPath(String credentialsPath) {
-        this.credentialsPath = credentialsPath;
-    }
+    private String credentialsPath;
+    public String getCredentialsPath() { return credentialsPath; }
+    public void setCredentialsPath(String value) { credentialsPath = value; }
+
+    private boolean validateCredentials = false;
+    public boolean getValidateCredentials(){ return validateCredentials; }
+    public void setValidateCredentials(boolean value) { validateCredentials = value; }
 }

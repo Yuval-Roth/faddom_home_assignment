@@ -44,6 +44,11 @@
             <artifactId>ec2</artifactId>
             <version>2.41.4</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>cloudwatch</artifactId>
+            <version>2.41.4</version>
+        </dependency>
     </dependencies>
 
     <build>
