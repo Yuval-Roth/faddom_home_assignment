@@ -2,19 +2,16 @@ package com.faddomtest.backend_server;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.regions.Region;
 
-@ConfigurationProperties(prefix = "app")
+@ConfigurationProperties(prefix = "aws")
 @Configuration
-public class AppConfig {
+public class AwsConfig {
     private String credentialsPath;
-    private String instanceIp;
-
-    public String getInstanceIp() {
-        return instanceIp;
-    }
 
     public String getCredentialsPath() {
         return credentialsPath;
+    }
+    public void setCredentialsPath(String credentialsPath) {
+        this.credentialsPath = credentialsPath;
     }
 }

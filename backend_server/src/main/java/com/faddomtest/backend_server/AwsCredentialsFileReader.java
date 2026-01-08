@@ -19,6 +19,10 @@ import java.util.Map;
 @Component
 public class AwsCredentialsFileReader implements AwsCredentialsProvider {
     private Map<String,String> credentialsMap;
+    private static final String formatMessage = """
+            Please make sure the credentials file is in the following format:
+            aws_access_key_id = <your access key>
+            aws_secret_access_key = <your secret key>""";
 
     public void init(String pathToCredentials) throws AwsCredentialsFileReaderException {
         try {
@@ -30,7 +34,9 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
                     if(line.contains("=")){
                         String[] keyValue = line.split("=");
                         if(keyValue.length != 2) {
-                            throw new AwsCredentialsFileReaderException("Badly formatted line in credentials file: " + line);
+                            throw new AwsCredentialsFileReaderException("""
+                                    Badly formatted line in credentials file: %s
+                                    %s""".formatted(line,formatMessage));
                         }
                         String key = keyValue[0].strip();
                         String value = keyValue[1].strip();
@@ -38,7 +44,9 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
                     }
                 }
             }
-            validateCredentials();
+            if(getAccessKeyId() == null || getSecretAccessKey() == null) {
+                throw new AwsCredentialsFileReaderException(formatMessage);
+            }
         } catch (IOException e) {
             if(e instanceof FileNotFoundException){
                 throw new AwsCredentialsFileReaderException("""
@@ -50,28 +58,18 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
         }
     }
 
-    private void validateCredentials() throws AwsCredentialsFileReaderException {
-
-        // Check if the credentials file is in the correct format
-        if(getAccessKeyId() == null || getSecretAccessKey() == null){
-            throw new AwsCredentialsFileReaderException("""
-                    Invalid credentials file.
-                    Please make sure the credentials file is in the following format:
-                    aws_access_key_id = <your access key>
-                    aws_secret_access_key = <your secret key>""");
-        }
-
-        // Test the credentials by making a call to AWS
+    public boolean validateCredentials() {
+        // test the credentials by making an EC2 call
         try (Ec2Client ec2Client = Ec2Client.builder()
                 .credentialsProvider(this)
                 .region(Region.US_EAST_1)
                 .build()){
 
+            // if the credentials are invalid, this call will throw an exception
             ec2Client.describeInstances();
+            return true;
         } catch (Ec2Exception e) {
-            throw new AwsCredentialsFileReaderException("""
-                    Credentials were rejected by AWS.
-                    Please make sure the credentials are up to date.""");
+            return false;
         }
     }
 
@@ -85,9 +83,6 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
 
     @Override
     public AwsCredentials resolveCredentials() {
-        if(credentialsMap == null || credentialsMap.isEmpty()){
-            throw new RuntimeException("AwsCredentialsReader has not been initialized.");
-        }
         return AwsBasicCredentials.create(
                 getAccessKeyId(),
                 getSecretAccessKey()
