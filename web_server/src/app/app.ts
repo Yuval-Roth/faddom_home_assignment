@@ -74,7 +74,6 @@ export class App {
         if(response.success){
           const dataPoints = response.data.map(data => JSON.parse(data)) as DataPoint[]
           const chartPoints = dataPoints.map(dataPoint => ({ x:dataPoint.timestamp, y:dataPoint.average }));
-          console.log(chartPoints)
           this.chart.updateChart(chartPoints);
         } else {
           alert("Error occurred while fetching data: \n\n"+response.message)
