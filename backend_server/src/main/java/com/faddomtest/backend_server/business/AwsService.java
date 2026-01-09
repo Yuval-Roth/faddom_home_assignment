@@ -1,16 +1,19 @@
 package com.faddomtest.backend_server.business;
 
 import com.faddomtest.backend_server.exceptions.AwsFileCredentialsProviderException;
+import com.faddomtest.backend_server.exceptions.AwsServiceException;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.cloudwatch.model.*;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -49,7 +52,7 @@ public class AwsService {
      * @return a list of datapoints (that may be empty) or null if the instance id could not be resolved,
      * which means that there is no instance associated with the ip
      */
-    public List<Datapoint> getCpuUsageStatistics(String instanceIp, LocalDateTime startTime, LocalDateTime endTime, int sampleInterval) {
+    public List<Datapoint> getCpuUsageStatistics(String instanceIp, LocalDateTime startTime, LocalDateTime endTime, int sampleInterval) throws AwsServiceException {
         String instanceId = resolveInstanceId(instanceIp);
         if(instanceId == null) return null;
 
@@ -67,22 +70,30 @@ public class AwsService {
             .period(sampleInterval)
             .statistics(Statistic.AVERAGE)
             .build();
-        var response = cloudWatch.getMetricStatistics(request);
-        return response.datapoints();
+        try{
+            var response = cloudWatch.getMetricStatistics(request);
+            return response.datapoints().stream().sorted(Comparator.comparing(Datapoint::timestamp)).toList();
+        } catch(Exception e){
+            throw new AwsServiceException(e.getMessage());
+        }
     }
 
     /**
      * @return the instance id or null if not found a matching instance with the private ip provided
      */
-    private String resolveInstanceId(String privateIp) {
+    private String resolveInstanceId(String privateIp) throws AwsServiceException {
         var request = DescribeInstancesRequest.builder().filters(
             Filter.builder()
                     .name("private-ip-address")
                     .values(privateIp)
                     .build()
         ).build();
-        var response = ec2.describeInstances(request);
-
+        DescribeInstancesResponse response;
+        try{
+            response = ec2.describeInstances(request);
+        } catch(Exception e){
+            throw new AwsServiceException(e.getMessage());
+        }
         // at most one instance is expected to match
         for (var reservation : response.reservations()) {
             for (var instance : reservation.instances()) {

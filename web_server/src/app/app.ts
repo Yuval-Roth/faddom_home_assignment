@@ -12,6 +12,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule} from '@angular/forms';
 import {MatTimepicker, MatTimepickerInput, MatTimepickerToggle} from '@angular/material/timepicker';
 import {DataFetcher, DataPoint} from './services/data-fetcher';
+import {HttpErrorResponse} from '@angular/common/http';
 
 const ipv4_regex_pattern = RegExp("^(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}$");
 
@@ -80,8 +81,8 @@ export class App {
         }
       },
 
-      error: error => {
-        alert("Request failed: "+error);
+      error: (error: HttpErrorResponse) => {
+        alert("Request failed: \n\n"+error.error.error);
       }
     })
   }

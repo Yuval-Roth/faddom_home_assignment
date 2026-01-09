@@ -2,6 +2,7 @@ package com.faddomtest.backend_server.api;
 
 import com.faddomtest.backend_server.api.requests.CpuUsageStatisticsRequest;
 import com.faddomtest.backend_server.business.AwsService;
+import com.faddomtest.backend_server.exceptions.AwsServiceException;
 import com.faddomtest.backend_server.utils.JsonUtils;
 import com.faddomtest.backend_server.utils.Response;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.services.cloudwatch.model.Datapoint;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -37,12 +41,20 @@ public class RestApi {
         }
 
         // business call
-        var result = awsService.getCpuUsageStatistics(
-                request.instanceIp(),
-                request.startTime(),
-                request.endTime(),
-                request.sampleInterval()
-        );
+        List<Datapoint> result;
+        try {
+            result = awsService.getCpuUsageStatistics(
+                    request.instanceIp(),
+                    request.startTime(),
+                    request.endTime(),
+                    request.sampleInterval()
+            );
+        } catch (AwsServiceException e) {
+            return Response.getError(e.getMessage(),HttpStatus.OK); // errors caught when making the request
+        } catch (Exception e){
+            e.printStackTrace();
+            return Response.getError("Request failed due to unexpected error",HttpStatus.INTERNAL_SERVER_ERROR); // other unexpected errors
+        }
 
         // if result is null it means that the ip does not match an instance and thus no data could be found
         // still we return status code 200 because the http request itself succeeded

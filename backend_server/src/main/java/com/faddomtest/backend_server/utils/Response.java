@@ -25,11 +25,6 @@ public class Response {
         return ResponseEntity.ok(responseBody);
     }
 
-    public static ResponseEntity<String> getOk(){
-        String responseBody = JsonUtils.serialize(new Response(null,true,null));
-        return ResponseEntity.ok(responseBody);
-    }
-
     public static ResponseEntity<String> getError(String message, HttpStatus status){
         String responseBody = JsonUtils.serialize(new Response(message,false,null));
         return new ResponseEntity<>(responseBody,status);
