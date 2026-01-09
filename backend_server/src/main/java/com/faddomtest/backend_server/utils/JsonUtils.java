@@ -3,6 +3,7 @@ package com.faddomtest.backend_server.utils;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,10 +50,24 @@ public class JsonUtils {
         }
     }
 
+    private static class InstantAdapter implements JsonSerializer<Instant>, JsonDeserializer<Instant> {
+        @Override
+        public JsonElement serialize(Instant src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.toString());
+        }
+
+        @Override
+        public Instant deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            return Instant.parse(json.getAsString());
+        }
+    }
+
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .registerTypeAdapter(LocalTime.class, new LocalTimeAdapter())
+            .registerTypeAdapter(Instant.class, new InstantAdapter())
             .enableComplexMapKeySerialization()
             .create();
 

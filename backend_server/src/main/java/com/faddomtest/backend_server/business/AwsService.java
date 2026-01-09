@@ -43,10 +43,6 @@ public class AwsService {
                 .credentialsProvider(credentialsProvider)
                 .region(Region.US_EAST_1)
                 .build();
-
-//        var startTime = LocalDateTime.now().minusDays(1).atZone(ZoneId.of("Asia/Jerusalem"));
-//        var endTime = startTime.plusHours(1);
-//        getCpuUsageStatistics("172.31.88.161",startTime.toInstant(),endTime.toInstant(), 60);
     }
 
     /**
