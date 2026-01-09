@@ -1,7 +1,6 @@
-package com.faddomtest.backend_server;
+package com.faddomtest.backend_server.business;
 
-import com.faddomtest.backend_server.exceptions.AwsCredentialsFileReaderException;
-import org.springframework.stereotype.Component;
+import com.faddomtest.backend_server.exceptions.AwsFileCredentialsProviderException;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -16,14 +15,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AwsCredentialsFileReader implements AwsCredentialsProvider {
+public class AwsFileCredentialsProvider implements AwsCredentialsProvider {
     private Map<String,String> credentialsMap;
     private static final String formatMessage = """
             Please make sure the credentials file is in the following format:
             aws_access_key_id = <your access key>
             aws_secret_access_key = <your secret key>""";
 
-    public void init(String pathToCredentials) throws AwsCredentialsFileReaderException {
+    public void init(String pathToCredentials) throws AwsFileCredentialsProviderException {
         try {
             credentialsMap = new HashMap<>();
             try (BufferedReader varsFile = new BufferedReader(new FileReader(pathToCredentials))) {
@@ -33,7 +32,7 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
                     if(line.contains("=")){
                         String[] keyValue = line.split("=");
                         if(keyValue.length != 2) {
-                            throw new AwsCredentialsFileReaderException("""
+                            throw new AwsFileCredentialsProviderException("""
                                     Badly formatted line in credentials file: %s
                                     %s""".formatted(line,formatMessage));
                         }
@@ -44,11 +43,11 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
                 }
             }
             if(getAccessKeyId() == null || getSecretAccessKey() == null) {
-                throw new AwsCredentialsFileReaderException(formatMessage);
+                throw new AwsFileCredentialsProviderException(formatMessage);
             }
         } catch (IOException e) {
             if(e instanceof FileNotFoundException){
-                throw new AwsCredentialsFileReaderException("""
+                throw new AwsFileCredentialsProviderException("""
                         Credentials file not found.
                         Make sure the credentials file exists in the following path:
                         %s""".formatted(pathToCredentials));
@@ -82,6 +81,10 @@ public class AwsCredentialsFileReader implements AwsCredentialsProvider {
 
     @Override
     public AwsCredentials resolveCredentials() {
+        if(credentialsMap == null || credentialsMap.isEmpty()){
+            throw new RuntimeException("File credentials provider not initialized");
+        }
+
         return AwsBasicCredentials.create(
                 getAccessKeyId(),
                 getSecretAccessKey()
