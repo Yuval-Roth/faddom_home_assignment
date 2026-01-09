@@ -1,1 +1,48 @@
+<div class="inputs-container">
+
+  <div class="datetime">
+    <mat-form-field appearance="outline">
+      <mat-label>Start date</mat-label>
+      <input matInput [matDatepicker]="startdatepicker" [(ngModel)]="startTime">
+      <mat-datepicker #startdatepicker/>
+      <mat-datepicker-toggle [for]="startdatepicker" matSuffix/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Start time</mat-label>
+      <input matInput [matTimepicker]="starttimepicker" [(ngModel)]="startTime" [ngModelOptions]="{updateOn: 'blur'}">
+      <mat-timepicker #starttimepicker/>
+      <mat-timepicker-toggle [for]="starttimepicker" matSuffix/>
+    </mat-form-field>
+  </div>
+
+  <div class="datetime">
+    <mat-form-field appearance="outline">
+      <mat-label>End date</mat-label>
+      <input matInput [matDatepicker]="enddatepicker" [(ngModel)]="endTime">
+      <mat-datepicker #enddatepicker/>
+      <mat-datepicker-toggle [for]="enddatepicker" matSuffix/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>End time</mat-label>
+      <input matInput [matTimepicker]="endtimepicker" [(ngModel)]="endTime" [ngModelOptions]="{updateOn: 'blur'}">
+      <mat-timepicker #endtimepicker/>
+      <mat-timepicker-toggle [for]="endtimepicker" matSuffix/>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Instance IP</mat-label>
+    <input matInput [(ngModel)]="instanceIp"/>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Interval (seconds)</mat-label>
+    <input matInput type="number" min="5" [(ngModel)]="intervalSeconds"/>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="loadData()">Load data</button>
+</div>
+
 <app-data-chart></app-data-chart>
