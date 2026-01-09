@@ -1,0 +1,8 @@
+<div class="chart-container">
+  <canvas #chart></canvas>
+  @if (! hasData()) {
+    <div class="no-data-message-container">
+      <p class="no-data-message">No data to display</p>
+    </div>
+  }
+</div>

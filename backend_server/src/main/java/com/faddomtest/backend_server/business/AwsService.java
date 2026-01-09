@@ -22,7 +22,7 @@ public class AwsService {
 
     public AwsService(AwsConfig awsConfig) {
         // setup credentials provider
-        AwsFileCredentialsProvider credentialsProvider = new AwsFileCredentialsProvider();
+        var credentialsProvider = new AwsFileCredentialsProvider();
         try {
             credentialsProvider.init(awsConfig.getCredentialsPath());
         } catch (AwsFileCredentialsProviderException e) {
