@@ -46,3 +46,10 @@
 </div>
 
 <app-data-chart></app-data-chart>
+@if(loading()){
+  <div class="loading-overlay">
+    <p class="loading-text">Loading...</p>
+    <div class="loader"></div>
+  </div>
+}
+

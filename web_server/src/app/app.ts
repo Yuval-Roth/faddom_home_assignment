@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, signal, ViewChild} from '@angular/core';
 import {MatFormField, MatInput, MatInputModule, MatLabel} from '@angular/material/input';
 import {
   MatDatepicker,
@@ -46,6 +46,8 @@ export class App {
   instanceIp: string | null = null;
   intervalSeconds = 60;
 
+  loading = signal(false);
+
   constructor(private dataFetcher: DataFetcher) {}
 
   loadData() {
@@ -63,6 +65,9 @@ export class App {
       alert("Invalid IPv4 entered for instance IP")
       return;
     }
+
+    this.loading.set(true);
+
     const request = {
       startTime: this.startTime.toISOString().slice(0,-1),
       endTime: this.endTime.toISOString().slice(0,-1),
@@ -76,12 +81,15 @@ export class App {
           const chartPoints = dataPoints.map(dataPoint => ({ x:dataPoint.timestamp, y:dataPoint.average }));
           this.chart.updateChart(chartPoints);
         } else {
-          alert("Error occurred while fetching data: \n\n"+response.message)
+          setTimeout(()=> alert("Error occurred while fetching data: \n\n"+response.message),100);
         }
       },
 
       error: (error: HttpErrorResponse) => {
-        alert("Request failed: \n\n"+error.error.error);
+        setTimeout(()=> alert("Request failed: \n\n"+error.error.error),100);
+      },
+      complete: () => {
+        this.loading.set(false);
       }
     })
   }
